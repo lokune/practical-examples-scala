@@ -1,6 +1,8 @@
-This project will show my attempts to solve day-to-day problems that I encounter when developing systems using some of the most popular Scala frameworks. Normally what I do, when learning new frameworks, I try to challenge myself to solve a real problem. I try not to just stick to the `Hello World` examples that come with most of the framework documentation but go further, think of a problem that the new framework I am learning is suited to solve and apply my acquired knowledge to do exactly that. This is a multi-module project. Each module has practical examples for a given Scala framework/toolkit.
+This project will show my attempts to solve day-to-day problems that I encounter when developing systems using some of the most popular Scala frameworks. Normally what I do, when learning new frameworks, I try to challenge myself to solve a real problem. I try not to just stick to the `Hello World` examples that come with most of the framework documentation but go further, think of a problem that the new framework I am learning is suited to solve and apply my acquired knowledge to do exactly that.
 
 I have been tinkering with Scala for more than a year now, developing mostly micro-services using [Spray](http://www.spray.io) then migrated to [Akka HTTP](http://doc.akka.io/docs/akka-http/current/scala/http) after [Spray](http://www.spray.io) was sundowned. The [Akka](http://www.akka.io) toolkit just inspires me: `Actors`, `Streams` and all the tools build on top of these two.
+
+This is a multi-module project. Each module has practical examples for a given Scala framework/toolkit.
 
 # `akka-streams`
 
@@ -8,9 +10,9 @@ I have been getting my hands dirty with Akka Streams. As stated in the official 
 
 I thought of a problem to solve using this noble API.
 
-*Given 100,000,000 random integers in a file, sort them and write the result in file. You can only hold 1000,000 integers in memory
+*Given 100,000,000 random integers in a file, sort them and write the result in file. You can only hold 1,000,000 integers in memory*
 
-N/B: This is a very popular interview question apparently.*
+*N/B: This is a very popular interview question apparently.*
 
 Solution? - External Sort
 
@@ -22,7 +24,7 @@ I adapted this [Java solution](http://www.ashishsharma.me/2011/08/external-merge
 
 I am going to stream integers from the input file, accumulate them into groups of 1,000,000 integers, sort and write each group to a separate file. I will then merge the separate sorted files into one big sorted file. I will use [custom stream processing stages](http://doc.akka.io/docs/akka/current/scala/stream/stream-customize.html#custom-processing-with-graphstage).  
 
-First of all, I needed the 100,000,000 integers. I created `MassiveFileCreator` object for this purpose.
+First of all, I needed the 100,000,000 integers. I created `MassiveFileCreator` object for this purpose. Code snippet shown below
 
     val source: Source[Int, NotUsed] = Source.fromIterator(() => Iterator.continually(Random.nextInt(100000000)).take(100000000))
 
