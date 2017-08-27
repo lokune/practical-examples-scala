@@ -3,7 +3,7 @@ package com.okune.streams
 import java.io.{BufferedReader, EOFException, File, FileReader}
 
 class BinaryFileBuffer(f: File, bufferSize: Int = 2048) {
-  val originalFile = f
+  val originalFile: File = f
   val br: BufferedReader = new BufferedReader(new FileReader(f), bufferSize)
 
   private[this] var cache = readLine()

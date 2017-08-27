@@ -8,13 +8,13 @@ import akka.stream.scaladsl.{FileIO, Flow, Keep, Sink, Source}
 import akka.stream.{ActorMaterializer, IOResult}
 import akka.util.ByteString
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 import scala.util.Random
 
 object MassiveFileCreator {
-  implicit val system = ActorSystem("MassiveFileCreator")
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem("MassiveFileCreator")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   //sbt "akka-streams/runMain com.okune.streams.MassiveFileCreator \"/Users/lokune/Desktop/Sort/100millionintegers.txt\""
   def main(args: Array[String]): Unit = {

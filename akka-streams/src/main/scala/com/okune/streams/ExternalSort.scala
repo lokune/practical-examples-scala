@@ -11,12 +11,12 @@ import akka.stream.stage.{GraphStage, GraphStageLogic, InHandler, OutHandler}
 import akka.util.ByteString
 
 import scala.collection.mutable
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContextExecutor, Future}
 
 object ExternalSort {
-  implicit val system = ActorSystem("ExternalSort")
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+  implicit val system: ActorSystem = ActorSystem("ExternalSort")
+  implicit val materializer: ActorMaterializer = ActorMaterializer()
+  implicit val ec: ExecutionContextExecutor = system.dispatcher
 
   //sbt "akka-streams/runMain com.okune.streams.ExternalSort \"/Users/lokune/Desktop/Sort/100millionintegers.txt\" \"/Users/lokune/Desktop/Sort/sortedintegers.txt\""
   def main(args: Array[String]): Unit = {
@@ -30,7 +30,7 @@ object ExternalSort {
     val source: Source[Long, Future[IOResult]] = FileIO.fromPath(Paths.get(filePath))
       .via(Framing.delimiter(ByteString("\n"), 256, true).map(_.utf8String.toLong))
 
-    val sink: Sink[Any, Future[Done]] = Sink.foreach(c => println(s"$c values sorted"))
+    val sink: Sink[Any, Future[Done]] = Sink.foreach(c => println(s"$c numbers sorted"))
 
     val results: Future[Done] = source.via(new AccumulateStage(1000000))
       .map(sort).via(new MergeStage(outputFilePath).async).runWith(sink)
@@ -48,14 +48,14 @@ object ExternalSort {
     * @tparam E element type as received from upstream
     */
   final class AccumulateStage[E](elementCount: Int) extends GraphStage[FlowShape[E, Seq[E]]] {
-    val in = Inlet[E]("AccumulateStage.in")
-    val out = Outlet[Seq[E]]("AccumulateStage.out")
+    val in: Inlet[E] = Inlet[E]("AccumulateStage.in")
+    val out: Outlet[Seq[E]] = Outlet[Seq[E]]("AccumulateStage.out")
 
-    override def shape = FlowShape.of(in, out)
+    override def shape: FlowShape[E, Seq[E]] = FlowShape.of(in, out)
 
     override def createLogic(inheritedAttributes: Attributes) = new GraphStageLogic(shape) {
-      private var currentCount: Int = 0
-      private val buffer = Vector.newBuilder[E]
+      var currentCount: Int = 0
+      val buffer: mutable.Builder[E, Vector[E]] = Vector.newBuilder[E]
 
       setHandlers(in, out, new InHandler with OutHandler {
         override def onPush(): Unit = {
@@ -85,7 +85,7 @@ object ExternalSort {
           completeStage()
         }
 
-        private def reset() = {
+        private def reset(): Unit = {
           buffer.clear()
           currentCount = 0
         }
@@ -101,13 +101,13 @@ object ExternalSort {
     * @tparam F element type pushed downstream from this stage
     */
   final class MergeStage[E, F](outputFilePath: String) extends GraphStage[FlowShape[Seq[E], F]] {
-    val in = Inlet[Seq[E]]("MergeStage.in")
-    val out = Outlet[F]("MergeStage.out")
+    val in: Inlet[Seq[E]] = Inlet[Seq[E]]("MergeStage.in")
+    val out: Outlet[F] = Outlet[F]("MergeStage.out")
 
     override def shape = FlowShape(in, out)
 
     override def createLogic(inheritedAttributes: Attributes) = new GraphStageLogic(shape) {
-      private val lstFiles = Vector.newBuilder[String]
+      val lstFiles: mutable.Builder[String, Vector[String]] = Vector.newBuilder[String]
       setHandlers(in, out, new InHandler with OutHandler {
         override def onPush(): Unit = {
           val nextSeq = grab(in)
