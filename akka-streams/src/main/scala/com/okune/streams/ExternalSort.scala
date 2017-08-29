@@ -28,9 +28,9 @@ object ExternalSort {
     val outputFilePath = args(1)
 
     val source: Source[Long, Future[IOResult]] = FileIO.fromPath(Paths.get(filePath))
-      .via(Framing.delimiter(ByteString("\n"), 256, true).map(_.utf8String.toLong))
+      .via(Framing.delimiter(ByteString("\n"), maximumFrameLength = 256, allowTruncation = true).map(_.utf8String.toLong))
 
-    val sink: Sink[Any, Future[Done]] = Sink.foreach(c => println(s"$c numbers sorted"))
+    val sink: Sink[Any, Future[Done]] = Sink.foreach(count => println(s"$count numbers sorted"))
 
     val results: Future[Done] = source.via(new AccumulateStage(1000000))
       .map(sort).via(new MergeStage(outputFilePath).async).runWith(sink)
@@ -42,7 +42,7 @@ object ExternalSort {
 
   /**
     * This stage accumulates stream elements and pushes them downstream as a group
-    * In this case, we are accumulating Integers as they are read from file in groups of `elementCount`
+    * In this case, we are accumulating Integers as they are streamed from file in groups of `elementCount`
     *
     * @param elementCount number of elements per group
     * @tparam E element type as received from upstream
