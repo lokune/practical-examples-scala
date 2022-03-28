@@ -12,19 +12,17 @@ I thought of a problem to solve using this noble API.
 
 *Given 100,000,000 random integers in a file, sort them and write the result in file. You can only hold 1,000,000 integers in memory*
 
-*N/B: This is a very popular interview question apparently.*
+*N/B: This is a very popular interview question, apparently.*
 
 Solution? - External Sort
 
 *External sorting is required when the data being sorted do not fit into the main memory of a computing device (usually RAM) and instead they must reside in the slower external memory (usually a hard drive). External sorting typically uses a sort-merge strategy. In the sorting phase, chunks of data small enough to fit in main memory are read, sorted, and written out to a temporary file. In the merge phase, the sorted subfiles are combined into a single larger file.*
 
-I adapted this [Java solution](http://www.ashishsharma.me/2011/08/external-merge-sort.html?m=1).
-
 #### Step-by-step
 
 I am going to stream integers from the input file, accumulate them into groups of 1,000,000 integers, sort and write each group to a separate file. I will then merge the separate sorted files into one big sorted file. I will use [custom stream processing stages](http://doc.akka.io/docs/akka/current/scala/stream/stream-customize.html#custom-processing-with-graphstage).  
 
-First of all, I needed the 100,000,000 integers. I created `MassiveFileCreator` object for this purpose. Code snippet shown below
+First, I needed the 100,000,000 integers. I created `MassiveFileCreator` object for this purpose. Code snippet shown below
 
     val source: Source[Int, NotUsed] = Source.fromIterator(() => Iterator.continually(Random.nextInt(100000000)).take(100000000))
 
